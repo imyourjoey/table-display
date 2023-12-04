@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tables Display</title>
+
+    <style>
+
+      body{
+        font-family: 'Helvetica', sans-serif;
+      }
+
+      .table-title{
+        padding-bottom: 0; 
+        margin-bottom: 5px;
+      }
+
+
+      #table1 {
+          border-collapse: collapse;
+          width: 20%;
+          
+      }
+
+      #table1 th {
+          text-align: left;
+          
+      }
+
+      #table2 {
+          border-collapse: collapse;
+          width: 50%;
+      }
+
+      #table2 td, th{
+        text-align:center;
+      }
+
+      table, th, td {
+          border: 1px solid black;
+      }
+
+      th, td {
+        padding: 5px;
+      }
+
+      .align-right {
+            text-align: right;
+      }
+
+      
+  </style>
+</head>
+<body>
+
+<h2 class="table-title">Table 1</h2>
+<table id="table1"></table>
+
+<h2 class="table-title">Table 2</h2>
+<table id="table2"></table>
+
+
+<script>
+    // fetchData() function retrieves and process data from csv file
+    async function fetchData() {
+        const response = await fetch('Table_input.csv');
+        const csvData = await response.text();
+
+        const rows = csvData.split('\n').slice(1);
+        const table1Data = [];
+        rows.forEach(row => {
+            const [index, value] = row.split(',');
+            table1Data.push({ Index: index.trim(), Value: parseInt(value.trim()) });
+        });
+
+        // calls displayTable() function to display Table 1
+        displayTable('table1', table1Data);
+
+        // calculate values for Table 2
+        const table2Data = [
+            { Category: 'Alpha', Value: table1Data.find(item => item.Index === 'A5').Value + table1Data.find(item => item.Index === 'A20').Value },
+            { Category: 'Beta', Value: table1Data.find(item => item.Index === 'A15').Value / table1Data.find(item => item.Index === 'A7').Value },
+            { Category: 'Charlie', Value: table1Data.find(item => item.Index === 'A13').Value * table1Data.find(item => item.Index === 'A12').Value }
+        ];
+
+        // calls displayTable() function to display Table 2
+        displayTable('table2', table2Data);
+    }
+
+  // displayTable() function is used to display a table
+  function displayTable(tableId, data) {
+        const table = document.getElementById(tableId);
+
+        // Create table header
+        const headerRow = document.createElement('tr');
+        Object.keys(data[0]).forEach(key => {
+            const th = document.createElement('th');
+            th.textContent = key;
+            headerRow.appendChild(th);
+        });
+        const thead = document.createElement('thead');
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create table body
+        const tbody = document.createElement('tbody');
+        data.forEach(item => {
+            const tr = document.createElement('tr');
+            Object.entries(item).forEach(([key, value]) => {
+                const td = document.createElement('td');
+                td.textContent = value;
+
+                // Apply the 'align-right' class to right-aligned columns
+                if (key === 'Value') {
+                    td.classList.add('align-right');
+                }
+
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+
+        // Append tbody to the table
+        table.appendChild(tbody);
+    }
+
+    // fetch and display data on page load
+    fetchData();
+</script>
+
+</body>
+</html>
